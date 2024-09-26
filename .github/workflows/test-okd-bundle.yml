@@ -1,0 +1,77 @@
+name: E2E Tests OKD
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths-ignore:
+      - 'doc/**'
+      - 'ide-config/**'
+      - '**.md'
+  schedule:
+    - cron: '0 1 * * *' # Every day at 1
+
+concurrency:
+  # Only run once for latest commit per ref and cancel other (previous) runs.
+  group: ci-e2e-okd-kubernetes-client-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Run OKD bundle with crc
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        go:
+          - '1.22'
+    env:
+      SHELL: /bin/bash
+      KUBECONFIG: '/Users/runner/.kube/config'
+      CRC_VERSION: 2.41.0
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Install required virtualization software
+        run: |
+          sudo apt-get update
+          sudo apt install qemu-kvm libvirt-daemon libvirt-daemon-system
+          sudo usermod -a -G libvirt $USER
+      - name: Remove unwanted stuff to free up disk image
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+
+          sudo docker image prune --all --force
+
+          sudo swapoff -a
+          sudo rm -f /mnt/swapfile
+          sudo adduser $USER libvirt
+          sudo adduser $USER kvm
+          sudo usermod -a -G libvirt $USER
+      - name: Download CRC
+        run: |
+          wget https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/crc/${CRC_VERSION}/crc-linux-amd64.tar.xz
+          tar -xJf crc-linux-amd64.tar.xz
+          sudo cp crc-linux-${CRC_VERSION}-amd64/crc /usr/local/bin/crc
+      - name: Set the crc config
+        run: |
+          crc config set preset okd
+          crc config set network-mode user
+      - name: Setup the crc
+        run: |
+          sudo -su $USER crc setup
+      - name: Start the crc
+        run: sudo -su $USER crc start
+      - name: Login into OpenShift Cluster
+        run: |
+          eval $(crc oc-env)
+          oc version
+          oc login -u developer -p developer https://api.crc.testing:6443

@@ -72,6 +72,7 @@ jobs:
         run: sudo -su $USER crc start
       - name: Login into OpenShift Cluster
         run: |
-          eval $(crc oc-env)
-          oc version
-          oc login -u developer -p developer https://api.crc.testing:6443
+          sudo -su $USER eval $(crc oc-env)         
+          sudo -su $USER oc version
+          sudo -su $USER oc login -u developer -p developer https://api.crc.testing:6443
+          sudo -su $USER oc login -u kubeadmin -p Ys7fY-9FWge-yAXj4-V5ZHP https://api.crc.testing:6443 --insecure-skip-tls-verify

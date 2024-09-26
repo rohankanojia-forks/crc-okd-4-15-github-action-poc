@@ -75,4 +75,13 @@ jobs:
           sudo -su $USER eval $(crc oc-env)         
           sudo -su $USER oc version
           sudo -su $USER oc login -u developer -p developer https://api.crc.testing:6443
-          sudo oc projects 
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Run Eclipse JKube Test
+        run: |
+          git clone git@github.com:rohanKanojia/eclipse-jkube-demo-project.git
+          cd eclipse-jkube-demo-project
+          mvn package oc:build oc:resource oc:apply  

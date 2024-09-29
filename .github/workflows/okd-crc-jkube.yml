@@ -75,3 +75,5 @@ jobs:
           git clone https://github.com/rohanKanojia/eclipse-jkube-demo-project.git
           cd eclipse-jkube-demo-project
           sudo -su $USER mvn package oc:build oc:resource oc:apply  
+          APPLICATION_ENDPOINT=`sudo -su $USER oc get routes random-generator -ojsonpath="{.spec.host}"`
+          sudo -su $USER curl "$APPLICATION_ENDPOINT/curl"

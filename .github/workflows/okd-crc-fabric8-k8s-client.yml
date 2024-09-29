@@ -63,8 +63,8 @@ jobs:
         run: |
           sudo -su $USER eval $(crc oc-env)         
           sudo -su $USER oc version
-          sudo -su $USER export CRC_LOGIN_PASSWORD=`crc console --credentials -ojson | jq .clusterConfig.adminCredentials.password`
-          sudo -su $USER oc login -u kubeadmin -p $CRC_LOGIN_PASSWORD https://api.crc.testing:6443
+          LOGIN_COMMAND=`sudo -su $USER crc console --credentials | grep admin | awk -F"'" '$0=$2'`
+          eval $LOGIN_COMMAND
           sudo -su $USER oc api-resources
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -73,7 +73,7 @@ jobs:
           distribution: 'temurin'
       - name: Run Fabric8 Kubernetes Client Tests
         run: |
-          git clone https://github.com/fabric8io/kubernetes-client.git
+          git clone https://github.com/rohanKanojia/kubernetes-client -b pr/okd-crc-ci-pipeline
           cd kubernetes-client
           mvn clean install -DskipTests 
           cd kubernetes-itests/

@@ -5,10 +5,6 @@ on:
   schedule:
     - cron: '0 4 * * *' # Every day at 4am
 
-concurrency:
-  group: single-instance-for-crc-okd-cluster
-  cancel-in-progress: true
-
 env:
   IT_REVISION: master
   IT_MODULE: kubernetes-itests
@@ -41,7 +37,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt install qemu-kvm libvirt-daemon libvirt-daemon-system
-          sudo usermod -a -G libvirt $USER
           sudo adduser $USER libvirt
           sudo adduser $USER kvm
           sudo usermod -a -G libvirt $USER

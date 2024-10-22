@@ -37,7 +37,8 @@ jobs:
         run: |
           cat /etc/os-release
           sudo apt-get update
-          sudo apt install --ignore-missing qemu-kvm libvirt-daemon libvirt-daemon-system virtiofsd
+          sudo apt-get install qemu-kvm libvirt-daemon libvirt-daemon-system
+          sudo apt-get --ignore-missing install virtiofsd || true
           sudo adduser $USER libvirt
           sudo adduser $USER kvm
           sudo usermod -a -G libvirt $USER

@@ -35,6 +35,17 @@ jobs:
           distribution: 'temurin'
       - name: Install required virtualization software
         run: |
+          cat /etc/os-release
+          UBUNTU_VERSION=`cat /etc/os-release | grep VERSION_ID | awk -F= '{print $2}' | tr -d '"'`
+          echo "Ubuntu version is $UBUNTU_VERSION"
+          if [ $UBUNTU_VERSION == "22.04" ]; then
+            echo "IT's 22.04"
+          elif [ $UBUNTU_VERSION == "24.04" ]; then
+            echo "IT's 24.04, installing virtiofsd"
+            sudo apt install virtiofsd
+          else
+            echo "None found, Actual $UBUNTU_VERSION"
+          fi
           sudo apt-get update
           sudo apt install qemu-kvm libvirt-daemon libvirt-daemon-system
           sudo adduser $USER libvirt

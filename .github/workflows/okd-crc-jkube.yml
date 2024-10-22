@@ -47,7 +47,14 @@ jobs:
       - name: Install required virtualization software
         run: |
           sudo apt-get update
-          sudo apt install qemu-kvm libvirt-daemon libvirt-daemon-system virtiofsd
+          sudo apt install qemu-kvm libvirt-daemon libvirt-daemon-system
+          cat /etc/os-release
+          UBUNTU_VERSION=`cat /etc/os-release | grep VERSION_ID | awk -F= '{print $2}'`
+          echo "Ubuntu version is $UBUNTU_VERSION"
+          if [$UBUNTU_VERSION -eq "24.04"]
+          then
+            sudo apt install virtiofsd
+          fi
           sudo usermod -a -G libvirt $USER
           sudo adduser $USER libvirt
           sudo adduser $USER kvm
